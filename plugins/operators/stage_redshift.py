@@ -2,6 +2,7 @@ from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
+
 class StageToRedshiftOperator(BaseOperator):
     ui_color = '#358140'
 
@@ -19,8 +20,3 @@ class StageToRedshiftOperator(BaseOperator):
 
     def execute(self, context):
         self.log.info('StageToRedshiftOperator not implemented yet')
-
-
-
-
-

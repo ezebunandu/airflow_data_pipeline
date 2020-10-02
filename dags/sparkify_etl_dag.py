@@ -1,16 +1,15 @@
 from datetime import datetime, timedelta
-import os
+
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
-from airflow.operators import (StageToRedshiftOperator, LoadFactOperator,
-                                LoadDimensionOperator, DataQualityOperator)
 from helpers import SqlQueries
-
-# AWS_KEY = os.environ.get('AWS_KEY')
-# AWS_SECRET = os.environ.get('AWS_SECRET')
+from operators.stage_redshift import StageToRedshiftOperator
+from operators.load_fact import LoadFactOperator
+from operators.load_dimension import LoadDimensionOperator
+from operators.data_quality import DataQualityOperator
 
 default_args = {
-    'owner': 'udacity',
+    'owner': 'samuel',
     'start_date': datetime(2019, 1, 12),
 }
 
