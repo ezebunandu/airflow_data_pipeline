@@ -11,24 +11,43 @@ from operators.data_quality import DataQualityOperator
 default_args = {
     'owner': 'samuel',
     'start_date': datetime(2019, 1, 12),
+    'depends_on_past': False,
+    'retries': 3,
+    'retry_delay': timedelta(minutes=5),
+    'catchup': False,
+    'email_on_retry': False,
 }
 
-dag = DAG('udac_example_dag',
+dag = DAG('sparkify-etl-dag',
           default_args=default_args,
           description='Load and transform data in Redshift with Airflow',
           schedule_interval='0 * * * *'
-        )
+          )
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
 stage_events_to_redshift = StageToRedshiftOperator(
     task_id='Stage_events',
-    dag=dag
+    dag=dag,
+    redshift_conn='redshift',
+    aws_credentials='aws_credentials',
+    table='staging_events',
+    s3_bucket='udacity-dend',
+    s3_key='log_data',
+    json_path='log_json_path.json',
+    provide_context=True,
 )
 
 stage_songs_to_redshift = StageToRedshiftOperator(
     task_id='Stage_songs',
-    dag=dag
+    dag=dag,
+    redshift_conn='redshift',
+    aws_credentials='aws_credentials',
+    table='staging_songs',
+    s3_bucket='udacity-dend',
+    s3_key='song_data',
+    json_path='auto',
+    provide_context=True,
 )
 
 load_songplays_table = LoadFactOperator(
@@ -62,3 +81,6 @@ run_quality_checks = DataQualityOperator(
 )
 
 end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
+
+start_operator >> stage_events_to_redshift
+start_operator >> stage_songs_to_redshift
