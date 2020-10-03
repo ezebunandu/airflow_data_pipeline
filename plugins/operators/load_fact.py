@@ -2,21 +2,28 @@ from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
+
 class LoadFactOperator(BaseOperator):
+    """Operator to load data into the fact tables
+    by querying the events and songs staging tables
+    """
 
     ui_color = '#F98866'
 
     @apply_defaults
     def __init__(self,
-                 # Define your operators params (with defaults) here
-                 # Example:
-                 # conn_id = your-connection-name
+                 redshift_conn='',
+                 table='',
+                 sql='',
                  *args, **kwargs):
 
-        super(LoadFactOperator, self).__init__(*args, **kwargs)
-        # Map params here
-        # Example:
-        # self.conn_id = conn_id
+        super().__init__(*args, **kwargs)
+        self.redshift_conn = redshift_conn
+        self.table = table
+        self.sql = sql
 
     def execute(self, context):
-        self.log.info('LoadFactOperator not implemented yet')
+        redshift = PostgresHook(self.redshift_conn)
+        self.log.info(f'Copying into {self.table}')
+
+        redshift.run(self.sql)

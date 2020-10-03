@@ -8,8 +8,17 @@ class SqlQueries:
         REGION 'us-west-2'
         FORMAT AS JSON {}
     """
-
     songplay_table_insert = """
+        INSERT INTO songplays (playid,
+                               start_time,
+                               userid,
+                               level,
+                               songid,
+                               artistid,
+                               sessionid,
+                               location,
+                               useragent
+                              )
         SELECT
                 md5(events.sessionid || events.start_time) songplay_id,
                 events.start_time,
@@ -20,7 +29,7 @@ class SqlQueries:
                 events.sessionid,
                 events.location,
                 events.useragent
-                FROM (SELECT TIMESTAMP 'epoch' + ts/1000 * interval '1 second' AS start_time, *
+            FROM (SELECT TIMESTAMP 'epoch' + ts/1000 * interval '1 second' AS start_time, *
             FROM staging_events
             WHERE page='NextSong') events
             LEFT JOIN staging_songs songs

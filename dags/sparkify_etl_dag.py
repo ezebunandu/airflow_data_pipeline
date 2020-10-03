@@ -52,7 +52,10 @@ stage_songs_to_redshift = StageToRedshiftOperator(
 
 load_songplays_table = LoadFactOperator(
     task_id='Load_songplays_fact_table',
-    dag=dag
+    dag=dag,
+    redshift_conn='redshift',
+    table='songplays',
+    sql=SqlQueries.songplay_table_insert,
 )
 
 load_user_dimension_table = LoadDimensionOperator(
@@ -82,5 +85,5 @@ run_quality_checks = DataQualityOperator(
 
 end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
 
-start_operator >> stage_events_to_redshift
-start_operator >> stage_songs_to_redshift
+start_operator >> [stage_events_to_redshift, stage_songs_to_redshift]
+[stage_events_to_redshift, stage_songs_to_redshift] >> load_songplays_table
