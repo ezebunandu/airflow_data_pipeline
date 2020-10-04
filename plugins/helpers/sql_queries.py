@@ -6,7 +6,7 @@ class SqlQueries:
         SECRET_ACCESS_KEY '{}'
         COMPUPDATE OFF
         REGION 'us-west-2'
-        FORMAT AS JSON {}
+        FORMAT AS JSON '{}'
     """
     songplay_table_insert = """
         INSERT INTO songplays (playid,
@@ -17,7 +17,7 @@ class SqlQueries:
                                artistid,
                                sessionid,
                                location,
-                               useragent
+                               user_agent
                               )
         SELECT
                 md5(events.sessionid || events.start_time) songplay_id,

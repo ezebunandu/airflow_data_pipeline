@@ -14,14 +14,16 @@ default_args = {
     'depends_on_past': False,
     'retries': 3,
     'retry_delay': timedelta(minutes=5),
-    'catchup': False,
+    'catchup_by_default': False,
     'email_on_retry': False,
 }
 
 dag = DAG('sparkify-etl-dag',
           default_args=default_args,
           description='Load and transform data in Redshift with Airflow',
-          schedule_interval='0 * * * *'
+          schedule_interval='0 * * * *',
+          catchup=False,
+          max_active_runs=1,
           )
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
@@ -34,7 +36,7 @@ stage_events_to_redshift = StageToRedshiftOperator(
     table='staging_events',
     s3_bucket='udacity-dend',
     s3_key='log_data',
-    json_path='log_json_path.json',
+    json_path='s3://udacity-dend/log_json_path.json',
     sql=SqlQueries.staging_table_copy,
     provide_context=True,
 )
