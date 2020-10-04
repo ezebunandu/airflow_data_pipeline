@@ -31,8 +31,10 @@ I am runnning an instance of Airflow in a docker container for this project. The
 
 * Pull the docker image from docker hub
 * Start a container off of the image, mounting the volumes containing the dags and plugins with the syntax `-v $(pwd)/plugins/:/usr/local/airflow/plugins`
-* Create a redshift cluster
+* Install boto3 to the container by running `docker container exec -it CONTAINER pip install boto3`
+* Create a redshift cluster programmatically or using the AWS console
 * Run the create_tables.sql file to create the tables required in Redshift
+* Access the Airflow web UI by connecting to the specified port, typically: `localhost:8080`
 * Configure connections to AWS and your redshift cluster using connection variables in the Airflow web UI
 * Run the DAG from the Airflow web UI
 
