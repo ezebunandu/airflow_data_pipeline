@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
-from helpers import SqlQueries
+from helpers.sql_queries import SqlQueries
 from operators.stage_redshift import StageToRedshiftOperator
 from operators.load_fact import LoadFactOperator
 from operators.load_dimension import LoadDimensionOperator
@@ -35,6 +35,7 @@ stage_events_to_redshift = StageToRedshiftOperator(
     s3_bucket='udacity-dend',
     s3_key='log_data',
     json_path='log_json_path.json',
+    sql=SqlQueries.staging_table_copy,
     provide_context=True,
 )
 
@@ -47,6 +48,7 @@ stage_songs_to_redshift = StageToRedshiftOperator(
     s3_bucket='udacity-dend',
     s3_key='song_data',
     json_path='auto',
+    sql=SqlQueries.staging_table_copy,
     provide_context=True,
 )
 
@@ -103,7 +105,8 @@ run_quality_checks = DataQualityOperator(
 end_operator = DummyOperator(task_id='Stop_execution',  dag=dag)
 
 start_operator >> [stage_events_to_redshift, stage_songs_to_redshift]
-[stage_events_to_redshift, stage_songs_to_redshift] >> load_songplays_table
+stage_events_to_redshift >> load_songplays_table
+stage_songs_to_redshift >> load_songplays_table
 load_songplays_table >> [load_user_dimension_table,
                          load_song_dimension_table,
                          load_artist_dimension_table,

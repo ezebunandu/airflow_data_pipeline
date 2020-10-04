@@ -2,7 +2,6 @@ from airflow.contrib.hooks.aws_hook import AwsHook
 from airflow.hooks.postgres_hook import PostgresHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
-from plugins.helpers.sql_queries import SqlQueries
 
 
 class StageToRedshiftOperator(BaseOperator):
@@ -20,15 +19,17 @@ class StageToRedshiftOperator(BaseOperator):
                  s3_bucket='',
                  s3_key='',
                  json_path='',
+                 sql='',
                  *args, **kwargs):
 
-        super(StageToRedshiftOperator, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.redshift_conn = redshift_conn
         self.aws_credentials = aws_credentials
         self.table = table
         self.s3_bucket = s3_bucket
         self.s3_key = s3_key
         self.json_path = json_path
+        self.sql = sql
 
     def execute(self, context):
         aws_hook = AwsHook(self.aws_credentials)
@@ -42,11 +43,11 @@ class StageToRedshiftOperator(BaseOperator):
         s3_path = f"s3://{self.s3_bucket}/{rendered_key}"
 
         self.log.info(f"copying data from {self.s3_bucket} to Redshift")
-        sql = SqlQueries.staging_table_copy.format(
+        formatted_sql = self.sql.format(
             self.table,
             s3_path,
             credentials.access_key,
             credentials.secret_key,
             self.json_path
         )
-        redshift.run(sql)
+        redshift.run(formatted_sql)
