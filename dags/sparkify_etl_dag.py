@@ -102,8 +102,10 @@ load_time_dimension_table = LoadDimensionOperator(
 run_quality_checks = DataQualityOperator(
     task_id='Run_data_quality_checks',
     dag=dag,
-    tables=['songplays', 'users', 'artists', 'songs', 'time'],
     redshift_conn='redshift',
+    quality_checks=[{'check_sql': "SELECT COUNT(*) FROM users",
+                     'expected_result': 140}
+                    ],
     provide_context=False,
 )
 
